@@ -1,0 +1,53 @@
+// schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL") // uses connection pooling
+  // directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String?  @unique
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+  xp        Int
+  worldSeed String
+  quests    Quest[]
+
+  @@map(name: "users")
+}
+
+model Quest {
+  id          String      @id @default(cuid())
+  title       String
+  description String?
+  status      String
+  xpValue     Int         @map(name: "xp_value")
+  sideQuests  SideQuest[]
+  user        User        @relation(fields: [userId], references: [id])
+  userId      String
+  createdAt   DateTime    @default(now()) @map(name: "created_at")
+  updatedAt   DateTime    @updatedAt @map(name: "updated_at")
+
+  @@map(name: "quests")
+}
+
+model SideQuest {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  status      String
+  xpValue     Int      @map(name: "xp_value")
+  quest       Quest?   @relation(fields: [questId], references: [id])
+  questId     String?
+  createdAt   DateTime @default(now()) @map(name: "created_at")
+  updatedAt   DateTime @updatedAt @map(name: "updated_at")
+
+  @@map(name: "side_quests")
+}
